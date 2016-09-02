@@ -7,7 +7,6 @@ var mkdirp = require('mkdirp');
 var uuid = require('uuid');
 var xdgBasedir = require('xdg-basedir');
 var osTmpdir = require('os-tmpdir');
-var writeFileAtomic = require('write-file-atomic');
 var dotProp = require('dot-prop');
 
 var user = (osenv.user() || uuid.v4()).replace(/\\/g, '');
@@ -47,7 +46,7 @@ Configstore.prototype = Object.create(Object.prototype, {
 
 				// empty the file if it encounters invalid JSON
 				if (err.name === 'SyntaxError') {
-					writeFileAtomic.sync(this.path, '', writeFileOptions);
+					fs.writeFileSync(this.path, '', assign({},writeFileOptions,{encoding: 'utf8'}));
 					return {};
 				}
 
@@ -60,7 +59,7 @@ Configstore.prototype = Object.create(Object.prototype, {
 				// could have been deleted in the meantime
 				mkdirp.sync(path.dirname(this.path), defaultPathMode);
 
-				writeFileAtomic.sync(this.path, JSON.stringify(val, null, '\t'), writeFileOptions);
+				fs.writeFileSync(this.path, JSON.stringify(val, null, '\t'), assign({},writeFileOptions,{encoding: 'utf8'}));
 			} catch (err) {
 				// improve the message of permission errors
 				if (err.code === 'EACCES') {
